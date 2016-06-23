@@ -1,0 +1,38 @@
+{
+  "name": "homer/wxpay",
+  "version": "1.0.0",
+  "description": "wxpay support",
+  "license": "proprietary",
+  "type": "library",
+
+  "autoload": {
+    "files": [
+      "src/Support/helpers.php"
+    ],
+    "psr-4": {
+      "Homer\\Payment\\Wxpay\\": "src/"
+    }
+  },
+
+  "autoload-dev": {
+    "files": [
+      "spec/Support/assert.php"
+    ]
+  },
+
+  "config": {
+    "preferred-install": "dist"
+  },
+
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+
+  "require": {
+    "guzzlehttp/guzzle": "^6.1",
+    "nesbot/carbon": "^1.21"
+  },
+
+  "require-dev": {
+    "phpspec/phpspec": "^2.5"
+  }
+}
