@@ -15,7 +15,7 @@ class Service extends AbstractService
      * @param string $description   order's description
      * @param string $clientIp      ip of user who request this payment. format as: 8.8.8.8
      * @param integer $expireAfter  order will be expired after $expireAfter seconds.
-     *                              a expired order can not be payed
+     *                              a expired order can not be paid
      * @param string $detail        order's products detail
      * @param string $attach        a transparent value, wxpay will transfer back this value
      *                              without any changes
@@ -81,8 +81,8 @@ class Service extends AbstractService
         }
 
         $this->ensureResponseNotForged($notification);
-
         $trade = $this->parseTradeUpdateNotification($notification);
+        
         if ('SUCCESS' == $trade->code) {
             if (call_user_func($callback, $trade)) {
                 return 'SUCCESS';
