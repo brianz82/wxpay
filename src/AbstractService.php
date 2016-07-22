@@ -262,7 +262,8 @@ abstract class AbstractService
         if ((string) $xml->return_code == 'SUCCESS' && (string) $xml->result_code == 'SUCCESS') {
             $result->code = 'SUCCESS';
         } else {
-            $result->code = isset($xml->err_code) ? (string) $xml->err_code : $result->code;
+            $result->code = isset($xml->err_code) ? (string) $xml->err_code :
+                            isset($xml->return_code) ? (string)$xml->return_code : $result->code;
             $result->message = isset($xml->err_code_des) ? (string) $xml->err_code_des : null;
         }
 
@@ -282,7 +283,6 @@ abstract class AbstractService
         return date('YmdHis') . uniqid() . str_pad(rand(1, 99999), 5, '0', STR_PAD_LEFT);
     }
 
-
     private function postUnifiedOrderRequestAndParse($params)
     {
         $xml = $this->postRequest(self::UNIFIED_ORDER_URL, $params);
@@ -291,8 +291,8 @@ abstract class AbstractService
         $result->code = 'UNKNOWN';
         $result->message = isset($xml->return_msg) ? (string) $xml->return_msg : null;
         if ((string) $xml->return_code == 'SUCCESS' && (string) $xml->result_code == 'SUCCESS') {
-            $sign = (string)$xml->sign;
-            // TODO: verify the response signature
+            // verify the response signature
+            $this->ensureResponseNotForged(array_map('trim', (array)$xml));
 
             $result->code = 'SUCCESS';
             $result->tradeType = (string) $xml->trade_type;
@@ -300,8 +300,9 @@ abstract class AbstractService
             $result->nonceStr = (string) $xml->nonce_str;
             $result->qrLink = isset($xml->code_url) ? (string) $xml->code_url : null;
         } else {
-            $result->code = isset($xml->err_code) ? (string) $xml->err_code : $result->code;
-            $result->message = isset($xml->err_code_des) ? (string) $xml->err_code_des : null;
+            $result->code = isset($xml->err_code) ? (string) $xml->err_code :
+                            isset($xml->return_code) ? (string)$xml->return_code : $result->code;
+            $result->message = isset($xml->err_code_des) ? (string) $xml->err_code_des : $result->message;
         }
 
         return $result;
@@ -342,7 +343,6 @@ abstract class AbstractService
 
         return $result;
     }
-
 
     /**
      * post xml request

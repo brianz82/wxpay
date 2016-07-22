@@ -16,7 +16,7 @@ class JsService extends AbstractService
      * @param integer $fee          payment total fee, unit: fen
      * @param string $description   order's description
      * @param string $clientIp      ip of user who request a payment. format as: 8.8.8.8
-     * @param integer $expireAfter  order will be expired after $expireAfter seconds.
+     * @param integer $expiredAfter order will be expired after $expireAfter seconds.
      *                              a expired order can not be payed
      * @param string $detail        order's products detail
      * @param string $attach        a transparent value, wxpay will transfer back this value
@@ -42,7 +42,7 @@ class JsService extends AbstractService
      *                                  or field return_code missed in response
      */
     public function placeOrder($openId, $orderNo, $fee, $description, $clientIp,
-                               $expireAfter = 3600,
+                               $expiredAfter = 3600,
                                $detail = '',
                                $attach = '')
     {
@@ -53,7 +53,7 @@ class JsService extends AbstractService
             'body'              => $description,
             'spbill_create_ip'  => $clientIp,
             'time_start'        => Carbon::now()->format('YmdHis'),
-            'time_expire'       => $expireAfter ? Carbon::now()->addSeconds($expireAfter) : '',
+            'time_expire'       => $expiredAfter ? Carbon::now()->addSeconds($expiredAfter)->format('YmdHis') : null,
             'detail'            => $detail,
             'attach'            => $attach,
             'trade_type'        => 'JSAPI',
