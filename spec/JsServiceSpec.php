@@ -2,6 +2,8 @@
 
 namespace spec\Homer\Payment\Wxpay;
 
+use Carbon\Carbon;
+use GuzzleHttp\RequestOptions;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 use GuzzleHttp\ClientInterface;
@@ -27,8 +29,24 @@ class JsServiceSpec extends ObjectBehavior
     //=========================================
     public function it_places_order_successfully(ClientInterface $client)
     {
-        $client->request('POST', 'https://api.mch.weixin.qq.com/pay/unifiedorder', Argument::cetera())
-            ->willReturn(new Response(200, [], file_get_contents(__DIR__ . '/data/place_unified_order_jsapi_success.xml')));
+        Carbon::setTestNow(Carbon::createFromFormat('Y-m-d H:i:s', '2016-07-23 00:55:22'));
+        $client->request('POST', 'https://api.mch.weixin.qq.com/pay/unifiedorder', Argument::that(function ($request) {
+            $request = simplexml_load_string($request[RequestOptions::BODY]);
+
+            if ($request->openid != 'oUpF8uMuAJO_M2pxb1Q9zNjWeS6o' ||
+                $request->out_trade_no != '201506072227000001' ||
+                $request->total_fee != '1' ||
+                $request->time_start != '20160723005522' ||
+                $request->time_expire != '20160723015522' ||
+                $request->trade_type != 'JSAPI' ||
+                $request->notify_url != 'http://localhost/trade.php' ||
+                $request->appid != 'wx2421b1c4370ec43b' ||
+                $request->mch_id != '10000100') {
+                return false;
+            }
+
+            return isset($request->nonce_str) && isset($request->sign);
+        }))->willReturn(new Response(200, [], file_get_contents(__DIR__ . '/data/place_unified_order_jsapi_success.xml')));
 
         $result = $this->placeOrder('oUpF8uMuAJO_M2pxb1Q9zNjWeS6o', '201506072227000001', 1, '报名费', '8.8.8.8')
             ->getWrappedObject();

@@ -28,10 +28,12 @@ class JsService extends AbstractService
      *                              - errCode       indicate the error code if responseCode equals 'FAIL'
      *                              - errMsg        description for errCode
      *                              the following fields are available if responseCode equals 'SUCCESS'
-     *                              - tradeType     available values are: APP, NATIVE
-     *                              - appid
+     *                              - tradeType   available values are: JSAPI, APP and NATIVE
+     *                              - prepayId    id of the prepare order created by wxpay
+     *                              - nonceStr    nonce string
+     *                              - qrLink      QR link, valid when tradeType is NATIVE, please see constant TRADE_TYPE_XXXX defined in this class
      *                              - jsApiParams   params will be call in Weixin jsapi, properties as below
-     *                                  - appId     appid
+     *                                  - appId     appId
      *                                  - timeStamp
      *                                  - nonceStr
      *                                  - package   prepay_id=xxxx
@@ -42,9 +44,7 @@ class JsService extends AbstractService
      *                                  or field return_code missed in response
      */
     public function placeOrder($openId, $orderNo, $fee, $description, $clientIp,
-                               $expiredAfter = 3600,
-                               $detail = '',
-                               $attach = '')
+                               $expiredAfter = 3600, $detail = '', $attach = '')
     {
         $params = array_filter([
             'openid'            => $openId,
@@ -94,8 +94,8 @@ class JsService extends AbstractService
         }
         
         $this->ensureResponseNotForged($notification);
-        $trade = $this->parseTradeUpdateNotification($notification);
 
+        $trade = $this->parseTradeUpdateNotification($notification);
         if ('SUCCESS' == $trade->code) {
             if (call_user_func($callback, $trade)) {
                 return 'SUCCESS';

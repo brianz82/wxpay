@@ -117,7 +117,7 @@ class ServiceSpec extends ObjectBehavior
             assert_equals('1', $trade->fee);
             assert_equals('1217752501201407033233368018', $trade->transId);
             assert_equals('', $trade->attach);
-            assert_equals('20150707195723', $trade->payAt);
+            assert_equals('20150707195723', $trade->paidAt);
 
             return true;
         })->shouldEqual('SUCCESS');
@@ -168,7 +168,7 @@ class ServiceSpec extends ObjectBehavior
         assert_equals('CNY', $result->feeType);
         assert_equals('1008450740201411110005820873', $result->transId);
         assert_equals('1415757673', $result->orderNo);
-        assert_equals('20141111170043', $result->payAt);
+        assert_equals('20141111170043', $result->paidAt);
     }
 
     function it_fails_on_bad_response_when_quering_order(ClientInterface $client)

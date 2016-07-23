@@ -86,7 +86,7 @@ abstract class AbstractService
      *                              - message     description for error message
      *                         the following fields are available if it succeeded
      *                              - tradeType   available values are: JSAPI, APP and NATIVE
-     *                              - prepayId    the prepare order id created by wxpay
+     *                              - prepayId    id of the prepare order created by wxpay
      *                              - nonceStr    nonce string
      *                              - qrLink      QR link, valid when tradeType is NATIVE, please see constant TRADE_TYPE_XXXX defined in this class
      */
@@ -123,19 +123,19 @@ abstract class AbstractService
      *                                      6) 'USERPAYING';      // 用户支付中
      *                                      7) 'PAYERROR';        // 支付失败
      *                                      8) 'UNKNOWN';         // 未知错误
-     *                      -- tradeStateDesc description for tradeState
-     *                      -- bank         扣款银行, such as CMC
-     *                      -- fee          total payment fee, unit: fen
-     *                      -- feeType      payment fee type, such as CNY
-     *                      -- cashFee      total fee of cash payment order
-     *                      -- cashFeeType  cash payment fee type, such as CNY
-     *                      -- couponFee    代金券或立减优惠金额
-     *                      -- couponCount  代金券或立减优惠使用数量
-     *                      -- transId payment order# in Wxpay system
-     *                      -- orderNo      order# in merchant system
-     *                      -- attach       transparent value supplied by user,
-     *                                      Wxpay return this value without any changes
-     *                      -- payAt  order payed time, format: yyyyMMddHHmmss
+     *                      - tradeStateDesc description for tradeState
+     *                      - bank         扣款银行, such as CMC
+     *                      - fee          total payment fee, unit: fen
+     *                      - feeType      payment fee type, such as CNY
+     *                      - cashFee      total fee of cash payment order
+     *                      - cashFeeType  cash payment fee type, such as CNY
+     *                      - couponFee    代金券或立减优惠金额
+     *                      - couponCount  代金券或立减优惠使用数量
+     *                      - transId      payment order# in Wxpay system
+     *                      - orderNo      order# in merchant system
+     *                      - attach       transparent value supplied by user,
+     *                                     Wxpay return this value without any changes
+     *                      - paidAt       order pay time, format: yyyyMMddHHmmss
 
      * @throw \Exception    exception will be throw if query request failed
      *                          or field return_code missed in response
@@ -162,9 +162,9 @@ abstract class AbstractService
      * @param string $transId       (optional) order# in wx's system
      *
      * @return \stdClass            result of this refund. with following fields set:
-     *                              -- code      response code. 'SUCCESS' on success
-     *                              -- message   additional message
-     *                              -- refundNo  refund#
+     *                              - code      response code. 'SUCCESS' on success
+     *                              - message   additional message
+     *                              - refundNo  refund#
      *
      */
     public function refundTrade($orderNo, $fee, $refundFee, $transId = null)
@@ -227,8 +227,7 @@ abstract class AbstractService
         $xml = $this->postRequest(self::REFUND_QUERY_URL, $params);
 
         $result = new \stdClass();
-        $result->code = 'UNKNOWN';
-        $result->message = isset($xml->return_msg) ? (string) $xml->return_msg : null;
+        $result->message = $this->parseResponseForMessage($xml);
         if ((string) $xml->return_code == 'SUCCESS' && (string) $xml->result_code == 'SUCCESS') {
             $result->code = 'SUCCESS';
             $result->transId = (string) $xml->transaction_id;
@@ -243,8 +242,7 @@ abstract class AbstractService
                 $item->status = (string)$xml->{"refund_status_$i"};
             }
         } else {
-            $result->code = isset($xml->err_code) ? (string) $xml->err_code : $result->code;
-            $result->message = isset($xml->err_code_des) ? (string) $xml->err_code_des : null;
+            $result->code = $this->parseResponseForCode($xml);
         }
 
         return $result;
@@ -255,16 +253,13 @@ abstract class AbstractService
         $xml = $this->postRequest(self::REFUND_URL, $params, true); // NOTE: verify peer is enabled
 
         $result = new \stdClass();
-        $result->code = 'UNKNOWN';
         $result->refundNo = $params['out_refund_no'];
-        $result->message = isset($xml->return_msg) ? (string) $xml->return_msg : null;
+        $result->message = $this->parseResponseForMessage($xml);
 
         if ((string) $xml->return_code == 'SUCCESS' && (string) $xml->result_code == 'SUCCESS') {
             $result->code = 'SUCCESS';
         } else {
-            $result->code = isset($xml->err_code) ? (string) $xml->err_code :
-                            isset($xml->return_code) ? (string)$xml->return_code : $result->code;
-            $result->message = isset($xml->err_code_des) ? (string) $xml->err_code_des : null;
+            $result->code = $this->parseResponseForCode($xml);
         }
 
         return $result;
@@ -288,11 +283,10 @@ abstract class AbstractService
         $xml = $this->postRequest(self::UNIFIED_ORDER_URL, $params);
 
         $result = new \stdClass();
-        $result->code = 'UNKNOWN';
-        $result->message = isset($xml->return_msg) ? (string) $xml->return_msg : null;
+        $result->message = $this->parseResponseForMessage($xml);
         if ((string) $xml->return_code == 'SUCCESS' && (string) $xml->result_code == 'SUCCESS') {
             // verify the response signature
-            $this->ensureResponseNotForged(array_map('trim', (array)$xml));
+            $this->ensureResponseNotForged(xml_to_array($xml));
 
             $result->code = 'SUCCESS';
             $result->tradeType = (string) $xml->trade_type;
@@ -300,9 +294,7 @@ abstract class AbstractService
             $result->nonceStr = (string) $xml->nonce_str;
             $result->qrLink = isset($xml->code_url) ? (string) $xml->code_url : null;
         } else {
-            $result->code = isset($xml->err_code) ? (string) $xml->err_code :
-                            isset($xml->return_code) ? (string)$xml->return_code : $result->code;
-            $result->message = isset($xml->err_code_des) ? (string) $xml->err_code_des : $result->message;
+            $result->code = $this->parseResponseForCode($xml);
         }
 
         return $result;
@@ -314,9 +306,10 @@ abstract class AbstractService
         $xml = $this->postRequest(self::ORDER_QUERY_URL, $params);
 
         $result = new \stdClass();
-        $result->code = 'UNKOWN';
-        $result->message = isset($xml->return_msg) ? (string) $xml->return_msg : null;
+        $result->message = $this->parseResponseForMessage($xml);
         if ((string) $xml->return_code == 'SUCCESS' && (string) $xml->result_code == 'SUCCESS') {
+            $this->ensureResponseNotForged(xml_to_array($xml));
+
             $result->code = 'SUCCESS';
 
             $result->deviceInfo = isset($xml->device_info) ? (string) $xml->device_info : null;
@@ -335,13 +328,39 @@ abstract class AbstractService
             $result->transId = (string) $xml->transaction_id;
             $result->orderNo = (string) $xml->out_trade_no;
             $result->attach = isset($xml->attach) ? (string) $xml->attach : null;
-            $result->payAt = (string) $xml->time_end;      // yyyyMMddHHmmss
+            $result->paidAt = (string) $xml->time_end;      // yyyyMMddHHmmss
         } else {
-            $result->code = isset($xml->err_code) ? (string) $xml->err_code : $result->code;
-            $result->message = isset($xml->err_code_des) ? (string) $xml->err_code_des : null;
+            $result->code = $this->parseResponseForCode($xml);
         }
 
         return $result;
+    }
+
+    // helper method to parse response for code
+    private function parseResponseForCode($xml, $default = 'FAIL')
+    {
+        if (isset($xml->err_code)) {
+            return (string)$xml->err_code;
+        }
+
+        if (isset($xml->return_code)) {
+            return (string)$xml->return_code;
+        }
+
+        return $default;
+    }
+
+    private function parseResponseForMessage($xml, $default = null)
+    {
+        if (isset($xml->return_msg)) {
+            return (string) $xml->return_msg;
+        }
+
+        if (isset($xml->err_code_des)) {
+            return (string) $xml->err_code_des;
+        }
+
+        return $default;
     }
 
     /**

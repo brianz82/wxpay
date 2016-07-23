@@ -5,7 +5,7 @@
    <mch_id><![CDATA[10000100]]></mch_id>
    <device_info><![CDATA[1000]]></device_info>
    <nonce_str><![CDATA[TN55wO9Pba5yENl8]]></nonce_str>
-   <sign><![CDATA[BDF0099C15FF7BC6B1585FBB110AB635]]></sign>
+   <sign><![CDATA[1508AD88F344FD89C0996A1166126DF8]]></sign>
    <result_code><![CDATA[SUCCESS]]></result_code>
    <openid><![CDATA[oUpF8uN95-Ptaags6E_roPHg7AG0]]></openid>
    <is_subscribe><![CDATA[Y]]></is_subscribe>

@@ -27,7 +27,7 @@ class Service extends AbstractService
      *                              - errMsg        description for errCode
      *                              the following fields are available if responseCode equals 'SUCCESS'
      *                              - tradeType     available values are: APP, NATIVE
-     *                              - appid
+     *                              - appId
      *                              - nonceStr
      *                              - prepayId      the prepare order id created by wxpay
      *
@@ -35,9 +35,7 @@ class Service extends AbstractService
      *                                  or field return_code missed in response
      */
     public function placeOrder($orderNo, $fee, $description, $clientIp,
-                               $expireAfter = 3600,
-                               $detail = '',
-                               $attach = '')
+                               $expireAfter = 3600, $detail = '', $attach = '')
     {
         return parent::prepareTrade([
             'out_trade_no'      => $orderNo,
@@ -105,25 +103,25 @@ class Service extends AbstractService
      *                  - orderNo      the order# related to the trade
      *                  - openId       user unique identifier in merchant appid
      *                  - tradeType    trade type, such as APP, NATIVE, JSAPI etc.
-     *                  - bankType     bank type (e.g, such as CMC)
+     *                  - bank         bank type (e.g, such as CMC)
      *                                 https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=4_2
-     *                  - fee          total fee user payed
+     *                  - fee          total fee user paid
      *                  - transId      the order# in wx's system
      *                  - attach       the additional params that sent previously when placing this order
-     *                  - payAt        payment end time. format: yyyyMMddHHmmss
+     *                  - paidAt       payment end time. format: yyyyMMddHHmmss
      */
     private function parseTradeUpdateNotification(array $notification)
     {
         $trade = new \stdClass();
-        $trade->orderNo         = $notification['out_trade_no'];
-        $trade->code            = $notification['result_code'];
-        $trade->openId          = $notification['openid'];
-        $trade->tradeType       = $notification['trade_type'];
-        $trade->bank            = $notification['bank_type'];
-        $trade->fee             = $notification['total_fee'];
-        $trade->transId         = $notification['transaction_id'];
-        $trade->attach          = array_get($notification, 'attach');
-        $trade->payAt           = $notification['time_end'];
+        $trade->orderNo   = $notification['out_trade_no'];
+        $trade->code      = $notification['result_code'];
+        $trade->openId    = $notification['openid'];
+        $trade->tradeType = $notification['trade_type'];
+        $trade->bank      = $notification['bank_type'];
+        $trade->fee       = $notification['total_fee'];
+        $trade->transId   = $notification['transaction_id'];
+        $trade->attach    = array_get($notification, 'attach');
+        $trade->paidAt    = $notification['time_end'];
 
         return $trade;
     }
