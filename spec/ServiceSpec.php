@@ -72,9 +72,9 @@ class ServiceSpec extends ObjectBehavior
             return true;
         }))->willReturn(new Response(200, [], file_get_contents(__DIR__ . '/data/place_unified_order_duplicated.xml')));
 
-        $result = $this->placeOrder('201506072227000001', 1, '报名费', '8.8.8.8')->getWrappedObject();
+        $this->shouldThrow(new \Exception('OK(OUT_TRADE_NO_USED)'))
+            ->duringPlaceOrder('201506072227000001', 1, '报名费', '8.8.8.8');
 
-        assert_equals('OUT_TRADE_NO_USED', $result->code);
     }
 
     function it_rejects_on_bad_signature_when_placing_order(ClientInterface $client)
@@ -94,9 +94,8 @@ class ServiceSpec extends ObjectBehavior
             return true;
         }))->willReturn(new Response(200, [], file_get_contents(__DIR__ . '/data/place_unified_order_bad_sign.xml')));
 
-        $result = $this->placeOrder('201506072227000001', 1, '报名费', '8.8.8.8')->getWrappedObject();
-
-        assert_equals('SIGNERROR', $result->code);
+        $this->shouldThrow(new \Exception('OK(SIGNERROR)'))
+            ->duringPlaceOrder('201506072227000001', 1, '报名费', '8.8.8.8');
     }
 
     function it_rejects_bad_response_when_placing_order(ClientInterface $client)

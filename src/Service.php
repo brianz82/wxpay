@@ -20,19 +20,9 @@ class Service extends AbstractService
      * @param string $attach        a transparent value, wxpay will transfer back this value
      *                              without any changes
      *
-     * @return \stdClass            return of this trade. with following fields set:
-     *                              - responseCode  'SUCCESS' for trade success,
-     *                                              'FAIL'  for trade failure,
-     *                              - errCode       indicate the error code if responseCode equals 'FAIL'
-     *                              - errMsg        description for errCode
-     *                              the following fields are available if responseCode equals 'SUCCESS'
-     *                              - tradeType     available values are: APP, NATIVE
-     *                              - appId
-     *                              - nonceStr
-     *                              - prepayId      the prepare order id created by wxpay
+     * @return array                fields defined in https://pay.weixin.qq.com/wiki/doc/api/app/app.php?chapter=9_12
      *
-     * @throw \Exception            exception will be throw if query request failed
-     *                                  or field return_code missed in response
+     * @throws \Exception
      */
     public function placeOrder($orderNo, $fee, $description, $clientIp,
                                $expireAfter = 3600, $detail = '', $attach = '')
@@ -50,7 +40,7 @@ class Service extends AbstractService
         ]);
 
         if ($trade->code != 'SUCCESS') {
-            return $trade;
+            throw new \Exception($trade->message . '(' . $trade->code . ')');
         }
 
         return $this->createTradeParams($trade);
