@@ -125,7 +125,7 @@ class ServiceSpec extends ObjectBehavior
             assert_equals('20150707195723', $trade->paidAt);
 
             return true;
-        })->shouldEqual('SUCCESS');
+        })->shouldEqual('<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>');
     }
 
     function it_detects_forged_notification_on_trade_update()

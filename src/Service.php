@@ -56,11 +56,11 @@ class Service extends AbstractService
     private function createTradeParams($order)
     {
         $params = [
-            'appid' => $this->appId,
+            'appid'     => $this->appId,
             'partnerid' => $this->merchantId,
-            'prepayid' => $order->prepayId,
-            'package' => 'Sign=WXPay',
-            'noncestr' => $order->nonceStr,
+            'prepayid'  => $order->prepayId,
+            'package'   => 'Sign=WXPay',
+            'noncestr'  => $order->nonceStr,
             'timestamp' => Carbon::now()->getTimestamp(),
         ];
         $params['sign'] = $this->signRequest($params);
@@ -100,13 +100,11 @@ class Service extends AbstractService
         
         if ('SUCCESS' == $trade->code) {
             if (call_user_func($callback, $trade)) {
-                return 'SUCCESS';
-            } else {
-                return 'FAIL';
+                return '<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>';
             }
         }
 
-        return 'FAIL';
+        return '<xml><return_code><![CDATA[FAILURE]]></return_code><return_msg><![CDATA[NO]]></return_msg></xml>';
     }
 
 
