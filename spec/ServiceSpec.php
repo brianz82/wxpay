@@ -47,6 +47,8 @@ class ServiceSpec extends ObjectBehavior
         assert_equals('SUCCESS', $result->code);
         assert_equals('OK', $result->message);
         assert_equals('wx201411101639507cbf6ffd8b0779950874', $result->prepayId);
+        assert_equals('10000100', $result->merchantId);
+        assert_equals('CB4FF8F607BEAC84ECCA04A35829E018', $result->sign);
     }
 
     function it_rejects_duplicated_order_when_placing_order(ClientInterface $client)

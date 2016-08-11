@@ -294,6 +294,8 @@ abstract class AbstractService
             $result->tradeType = (string) $xml->trade_type;
             $result->prepayId = (string) $xml->prepay_id;
             $result->nonceStr = (string) $xml->nonce_str;
+            $result->merchantId = $this->merchantId;
+            $result->sign = $params['sign'];
             $result->qrLink = isset($xml->code_url) ? (string) $xml->code_url : null;
         } else {
             $result->code = $this->parseResponseForCode($xml);
