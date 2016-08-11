@@ -1,6 +1,7 @@
 <?php
 namespace spec\Homer\Payment\Wxpay;
 
+use Carbon\Carbon;
 use GuzzleHttp\RequestOptions;
 use PhpSpec\ObjectBehavior;
 use GuzzleHttp\ClientInterface;
@@ -27,6 +28,7 @@ class ServiceSpec extends ObjectBehavior
     //=========================================
     function it_places_order(ClientInterface $client)
     {
+        Carbon::setTestNow(Carbon::createFromTimestamp(1470919875));
         $client->request('POST', 'https://api.mch.weixin.qq.com/pay/unifiedorder', Argument::that(function ($options) {
             $request = simplexml_load_string($options[RequestOptions::BODY]);
 
@@ -42,13 +44,15 @@ class ServiceSpec extends ObjectBehavior
             return true;
         }))->willReturn(new Response(200, [], file_get_contents(__DIR__ . '/data/place_unified_order_success.xml')));
 
-        $result = $this->placeOrder('201506072227000001', 1, '报名费', '8.8.8.8')->getWrappedObject();
+        $params = $this->placeOrder('201506072227000001', 1, '报名费', '8.8.8.8')->getWrappedObject();
 
-        assert_equals('SUCCESS', $result->code);
-        assert_equals('OK', $result->message);
-        assert_equals('wx201411101639507cbf6ffd8b0779950874', $result->prepayId);
-        assert_equals('10000100', $result->merchantId);
-        assert_equals('CB4FF8F607BEAC84ECCA04A35829E018', $result->sign);
+        assert_equals('wx2421b1c4370ec43b', $params['appid']);
+        assert_equals('10000100', $params['partnerid']);
+        assert_equals('wx201411101639507cbf6ffd8b0779950874', $params['prepayid']);
+        assert_equals('Sign=WXPay', $params['package']);
+        assert_equals('IITRi8Iabbblz1Jc', $params['noncestr']);
+        assert_equals('1470919875', $params['timestamp']);
+        assert_equals('911C47AE9657533E426108EDDBFB2C20', $params['sign']);
     }
 
     function it_rejects_duplicated_order_when_placing_order(ClientInterface $client)

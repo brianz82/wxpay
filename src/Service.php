@@ -37,7 +37,7 @@ class Service extends AbstractService
     public function placeOrder($orderNo, $fee, $description, $clientIp,
                                $expireAfter = 3600, $detail = '', $attach = '')
     {
-        return parent::prepareTrade([
+        $trade = parent::prepareTrade([
             'out_trade_no'      => $orderNo,
             'total_fee'         => $fee,
             'body'              => $description,
@@ -48,8 +48,35 @@ class Service extends AbstractService
             'attach'            => $attach,
             'trade_type'        => 'APP',
         ]);
+
+        if ($trade->code != 'SUCCESS') {
+            return $trade;
+        }
+
+        return $this->createTradeParams($trade);
     }
 
+    /**
+     * after prepay order is placed, create params for client to invoke client wxpay
+     *
+     * https://pay.weixin.qq.com/wiki/doc/api/app/app.php?chapter=9_12
+     * @param object $order   the prepay order
+     * @return array          params for client to invoke wxpay
+     */
+    private function createTradeParams($order)
+    {
+        $params = [
+            'appid' => $this->appId,
+            'partnerid' => $this->merchantId,
+            'prepayid' => $order->prepayId,
+            'package' => 'Sign=WXPay',
+            'noncestr' => $order->nonceStr,
+            'timestamp' => Carbon::now()->getTimestamp(),
+        ];
+        $params['sign'] = $this->signRequest($params);
+
+        return $params;
+    }
 
     /**
      * called when a trade's status changes (asynchronously)

@@ -3,6 +3,7 @@
 namespace Homer\Payment\Wxpay;
 
 
+use Carbon\Carbon;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\RequestOptions;
@@ -294,8 +295,6 @@ abstract class AbstractService
             $result->tradeType = (string) $xml->trade_type;
             $result->prepayId = (string) $xml->prepay_id;
             $result->nonceStr = (string) $xml->nonce_str;
-            $result->merchantId = $this->merchantId;
-            $result->sign = $params['sign'];
             $result->qrLink = isset($xml->code_url) ? (string) $xml->code_url : null;
         } else {
             $result->code = $this->parseResponseForCode($xml);
@@ -403,7 +402,11 @@ abstract class AbstractService
     {
         $xml = '<xml>';
         foreach ($data as $k => $v) {
-            $xml .= sprintf('<%s>%s</%s>', $k, $v, $k);
+            if (is_string($v)) { // prevent accidental text in $v, use CDATA for it
+                $xml .= sprintf('<%s><![CDATA[%s]]></%s>', $k, $v, $k);
+            } else {
+                $xml .= sprintf('<%s>%s</%s>', $k, $v, $k);
+            }
         }
         $xml .= '</xml>';
 
