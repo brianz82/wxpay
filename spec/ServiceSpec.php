@@ -72,7 +72,7 @@ class ServiceSpec extends ObjectBehavior
             return true;
         }))->willReturn(new Response(200, [], file_get_contents(__DIR__ . '/data/place_unified_order_duplicated.xml')));
 
-        $this->shouldThrow(new \Exception('OK(OUT_TRADE_NO_USED)'))
+        $this->shouldThrow(new \Exception('订单重复(OUT_TRADE_NO_USED)'))
             ->duringPlaceOrder('201506072227000001', 1, '报名费', '8.8.8.8');
 
     }
@@ -94,7 +94,7 @@ class ServiceSpec extends ObjectBehavior
             return true;
         }))->willReturn(new Response(200, [], file_get_contents(__DIR__ . '/data/place_unified_order_bad_sign.xml')));
 
-        $this->shouldThrow(new \Exception('OK(SIGNERROR)'))
+        $this->shouldThrow(new \Exception('签名错误(SIGNERROR)'))
             ->duringPlaceOrder('201506072227000001', 1, '报名费', '8.8.8.8');
     }
 
@@ -114,6 +114,40 @@ class ServiceSpec extends ObjectBehavior
     {
         parse_str(file_get_contents(__DIR__ . '/data/trade_update_success.txt'), $notification);
         $this->tradeUpdated($notification, function($trade) {
+            assert_equals('201506072227000001', $trade->orderNo);
+            assert_equals('SUCCESS', $trade->code);
+            assert_equals('wxd930ea5d5a258f4f', $trade->openId);
+            assert_equals('APP', $trade->tradeType);
+            assert_equals('CMC', $trade->bank);
+            assert_equals('1', $trade->fee);
+            assert_equals('1217752501201407033233368018', $trade->transId);
+            assert_equals('', $trade->attach);
+            assert_equals('20150707195723', $trade->paidAt);
+
+            return true;
+        })->shouldEqual('<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>');
+    }
+
+    function it_works_on_trade_updated_with_xml()
+    {
+        $this->tradeUpdated(file_get_contents(__DIR__ . '/data/trade_update_success.xml'), function($trade) {
+            assert_equals('SSUROU160812000649R6A5LD', $trade->orderNo);
+            assert_equals('SUCCESS', $trade->code);
+            assert_equals('ohdWoxI_LhQYmr-FxsIBwyLB4HUE"', $trade->openId);
+            assert_equals('APP', $trade->tradeType);
+            assert_equals('CFT', $trade->bank);
+            assert_equals('1', $trade->fee);
+            assert_equals('4003772001201608121136066568', $trade->transId);
+            assert_equals(null, $trade->attach);
+            assert_equals('20160812000659', $trade->paidAt);
+
+            return true;
+        })->shouldEqual('<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>');
+    }
+
+    function it_works_on_trade_updated_with_qs()
+    {
+        $this->tradeUpdated(file_get_contents(__DIR__ . '/data/trade_update_success.txt'), function($trade) {
             assert_equals('201506072227000001', $trade->orderNo);
             assert_equals('SUCCESS', $trade->code);
             assert_equals('wxd930ea5d5a258f4f', $trade->openId);

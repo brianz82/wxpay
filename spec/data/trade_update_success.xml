@@ -1,0 +1,18 @@
+<xml>
+    <appid><![CDATA[wx3879b16b226d2405]]></appid>
+    <bank_type><![CDATA[CFT]]></bank_type>
+    <cash_fee><![CDATA[1]]></cash_fee>
+    <fee_type><![CDATA[CNY]]></fee_type>
+    <is_subscribe><![CDATA[N]]></is_subscribe>
+    <mch_id><![CDATA[1372823402]]></mch_id>
+    <nonce_str><![CDATA[AOjBb8GNixJooEW6eoj3CmoiFWPZbIOM]]></nonce_str>
+    <openid><![CDATA[ohdWoxI_LhQYmr-FxsIBwyLB4HUE]]></openid>
+    <out_trade_no><![CDATA[SSUROU160812000649R6A5LD]]></out_trade_no>
+    <result_code><![CDATA[SUCCESS]]></result_code>
+    <return_code><![CDATA[SUCCESS]]></return_code>
+    <sign><![CDATA[0FC876CB256DF24550C3BEB61968F73F]]></sign>
+    <time_end><![CDATA[20160812000659]]></time_end>
+    <total_fee>1</total_fee>
+    <trade_type><![CDATA[APP]]></trade_type>
+    <transaction_id><![CDATA[4003772001201608121136066568]]></transaction_id>
+</xml>

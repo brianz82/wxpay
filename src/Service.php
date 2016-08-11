@@ -72,7 +72,7 @@ class Service extends AbstractService
      * called when a trade's status changes (asynchronously)
      * https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_7
      *
-     * @param array $notification   notification (typically the whole $_POST) from Wxpay
+     * @param array|string $notification   notification (typically the whole $_POST) from Wxpay
      * @param callable $callback    callback will be passed, the parsed trade as its param
      *                                  callback receive a trade object, which properities lists as below:
      *                                  1). orderNo       the order# related to the trade
@@ -89,8 +89,12 @@ class Service extends AbstractService
      * @throws \Exception exception will thrown in case of invalid signature
      *                              or bad trade status
      */
-    public function tradeUpdated(array $notification, callable $callback)
+    public function tradeUpdated($notification, callable $callback)
     {
+        if (is_string($notification)) { // for string notification
+            $notification = $this->morphNotification($notification);
+        }
+
         if ($notification['return_code'] != 'SUCCESS') {
             return 'FAIL';
         }
@@ -107,6 +111,40 @@ class Service extends AbstractService
         return '<xml><return_code><![CDATA[FAILURE]]></return_code><return_msg><![CDATA[NO]]></return_msg></xml>';
     }
 
+    /**
+     * morph the notification (as array)
+     *
+     * @param string $notification
+     * @return array
+     */
+    private function morphNotification($notification)
+    {
+        // the notification can be xml string
+        $morphed = $this->xml2array($notification);
+        if ($morphed !== false) {
+            return $morphed;
+        }
+
+        // or it can be http query string
+        parse_str($notification, $morphed);
+        return $morphed;
+    }
+
+    /**
+     * convert xml to array
+     *
+     * @param string $xml
+     * @return array|bool   false if it's not valid xml
+     */
+    private function xml2array($xml)
+    {
+        $xmlEl = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA|LIBXML_NOERROR|LIBXML_NOWARNING);
+        if ($xmlEl === false) {
+            return false;
+        }
+
+        return json_decode(json_encode($xmlEl), TRUE);
+    }
 
     /**
      * find trade's related order#, status, etc. from given text

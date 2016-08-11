@@ -1,6 +1,6 @@
 <xml>
     <return_code><![CDATA[SUCCESS]]></return_code>
-    <return_msg><![CDATA[OK]]></return_msg>
+    <return_msg><![CDATA[订单重复]]></return_msg>
     <appid><![CDATA[wx2421b1c4370ec43b]]></appid>
     <mch_id><![CDATA[10000100]]></mch_id>
     <nonce_str><![CDATA[IITRi8Iabbblz1Jc]]></nonce_str>
