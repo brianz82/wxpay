@@ -24,6 +24,12 @@ class JsServiceSpec extends ObjectBehavior
         $this->beAnInstanceOf(\Homer\Payment\Wxpay\JsService::class, [$config, $client]);
     }
 
+    function letGo()
+    {
+        // reset the Carbon now
+        Carbon::setTestNow(null);
+    }
+
     //=========================================
     //          place unified order
     //=========================================

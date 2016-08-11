@@ -94,6 +94,8 @@ abstract class AbstractService
     {
         $params['notify_url'] = $this->notifyUrl;
         $this->padCommonParams($params);
+        $params = array_filter($params); // wxpay doesn't like either null or empty param
+
         $params['sign'] = $this->signRequest($params);
 
         return $this->postUnifiedOrderRequestAndParse($params);
@@ -399,11 +401,7 @@ abstract class AbstractService
     {
         $xml = '<xml>';
         foreach ($data as $k => $v) {
-            if (is_numeric($v)) {
-                $xml .= sprintf('<%s>%s</%s>', $k, $v, $k);
-            } else {
-                $xml .= sprintf('<%s><![CDATA[%s]]></%s>', $k, $v, $k);
-            }
+            $xml .= sprintf('<%s>%s</%s>', $k, $v, $k);
         }
         $xml .= '</xml>';
 
