@@ -96,7 +96,7 @@ class Service extends AbstractService
         }
 
         if ($notification['return_code'] != 'SUCCESS') {
-            return 'FAIL';
+            throw new \Exception($notification['return_code']);
         }
 
         $this->ensureResponseNotForged($notification);
