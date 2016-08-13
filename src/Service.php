@@ -103,10 +103,16 @@ class Service extends AbstractService
 
         if ($notification['return_code'] != 'SUCCESS') {
             // callback with an error
-            return call_user_func($callback, null, (object)[
-                'code'    => $notification['return_code'],
-                'message' => $notification['return_msg']
-            ]);
+            try {
+                call_user_func($callback, null, (object)[
+                    'code'    => $notification['return_code'],
+                    'message' => $notification['return_msg']
+                ]);
+            } catch (\Throwable $ex) {
+                // ignore any exceptions
+            }
+
+            return self::respondFailureOnTradeUpdated();
         }
 
         $this->ensureResponseNotForged($notification);
@@ -120,6 +126,11 @@ class Service extends AbstractService
             // ignore any exceptions, and let the rest of the code to respond error
         }
 
+        return self::respondFailureOnTradeUpdated();
+    }
+
+    private static function respondFailureOnTradeUpdated()
+    {
         return '<xml><return_code><![CDATA[FAILURE]]></return_code><return_msg><![CDATA[NO]]></return_msg></xml>';
     }
 
