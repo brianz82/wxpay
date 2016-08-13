@@ -73,18 +73,24 @@ class Service extends AbstractService
      * https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_7
      *
      * @param array|string $notification   notification (typically the whole $_POST) from Wxpay
-     * @param callable $callback    callback will be passed, the parsed trade as its param
-     *                                  callback receive a trade object, which properities lists as below:
-     *                                  1). orderNo       the order# related to the trade
-     *                                  2). openid        user unique identifier in merchant appid
-     *                                  3). tradeType     trade type, such as APP, NATIVE, JSAPI etc.
-     *                                  4). bank          bank type. such as CMC
-     *                                  5). fee           total fee user payed
-     *                                  6). transactionId Wxpay payment order#
-     *                                  7). attach        transparent value, Wxpay not change it
-     *                                  8). paymentTime  payment end time. format: yyyyMMddHHmmss
+     * @param callable $callback    callback will be passed, the parsed trade as its first param with following
+     *                              attributes:
+     *                              - code         'SUCCESS' for trade success.
+     *                              - orderNo      the order# related to the trade
+     *                              - openId       user unique identifier in merchant appid
+     *                              - tradeType    trade type, such as APP, NATIVE, JSAPI etc.
+     *                              - bank         bank type (e.g, such as CMC)
+     *                                             https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=4_2
+     *                              - fee          total fee user paid
+     *                              - transId      the order# in wx's system
+     *                              - attach       the additional params that sent previously when placing this order
+     *                              - paidAt       payment end time. format: yyyyMMddHHmmss
      *
-     * @return string               SUCCESS or FAIL
+     *                              on error, the second param will be passed in with following attributes:
+     *                              - code         error code
+     *                              - message      error message
+     *
+     * @return string               xml text to indicate the notification is successfully or failed to be handled
      *
      * @throws \Exception exception will thrown in case of invalid signature
      *                              or bad trade status
@@ -96,14 +102,18 @@ class Service extends AbstractService
         }
 
         if ($notification['return_code'] != 'SUCCESS') {
-            throw new \Exception($notification['return_msg'] . '(' . $notification['return_code'] . ')');
+            // callback with an error
+            return call_user_func($callback, null, (object)[
+                'code'    => $notification['return_code'],
+                'message' => $notification['return_msg']
+            ]);
         }
 
         $this->ensureResponseNotForged($notification);
         $trade = $this->parseTradeUpdateNotification($notification);
 
         try {
-            if ('SUCCESS' == $trade->code && call_user_func($callback, $trade)) {
+            if ('SUCCESS' == $trade->code && call_user_func($callback, $trade, null)) {
                 return '<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>';
             }
         } catch (\Throwable $ex) {
