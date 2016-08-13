@@ -10,7 +10,7 @@ if (!function_exists('assert_equals')) {
      *
      * @throws Exception        if the two objects not equal
      */
-    function assert_equals($expected, $actual, $message = null, $delta = 0.0)
+    function assert_equals($expected, $actual, $message = null, $delta = 1E-6)
     {
         if ($expected == $actual) {
             return;
