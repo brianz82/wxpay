@@ -119,7 +119,7 @@ class Service extends AbstractService
         $trade = $this->parseTradeUpdateNotification($notification);
 
         try {
-            if ('SUCCESS' == $trade->code && call_user_func($callback, $trade, null)) {
+            if (call_user_func($callback, $trade, null)) {
                 return '<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>';
             }
         } catch (\Throwable $ex) {
@@ -129,6 +129,11 @@ class Service extends AbstractService
         return self::respondFailureOnTradeUpdated();
     }
 
+    /**
+     * respond wxpay when client failed to handle trade update
+     *
+     * @return string
+     */
     private static function respondFailureOnTradeUpdated()
     {
         return '<xml><return_code><![CDATA[FAILURE]]></return_code><return_msg><![CDATA[NO]]></return_msg></xml>';
