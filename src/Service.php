@@ -96,16 +96,18 @@ class Service extends AbstractService
         }
 
         if ($notification['return_code'] != 'SUCCESS') {
-            throw new \Exception($notification['return_code']);
+            throw new \Exception($notification['return_msg'] . '(' . $notification['return_code'] . ')');
         }
 
         $this->ensureResponseNotForged($notification);
         $trade = $this->parseTradeUpdateNotification($notification);
-        
-        if ('SUCCESS' == $trade->code) {
-            if (call_user_func($callback, $trade)) {
+
+        try {
+            if ('SUCCESS' == $trade->code && call_user_func($callback, $trade)) {
                 return '<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>';
             }
+        } catch (\Throwable $ex) {
+            // ignore any exceptions, and let the rest of the code to respond error
         }
 
         return '<xml><return_code><![CDATA[FAILURE]]></return_code><return_msg><![CDATA[NO]]></return_msg></xml>';
