@@ -16,9 +16,13 @@ if (!function_exists('assert_equals')) {
             return;
         }
 
-        if (abs($expected - $actual) > $delta) {
-            throw new \Exception($message ?: sprintf('expected %s, but got %s', $expected, $actual));
+        if (is_numeric($expected) && is_numeric($actual)) {
+            if (abs($expected - $actual) <= $delta) {
+                return ;
+            }
         }
+
+        throw new \Exception($message ?: sprintf('expected %s, but got %s', $expected, $actual));
     }
 }
 
