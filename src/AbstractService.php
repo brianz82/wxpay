@@ -389,7 +389,7 @@ abstract class AbstractService
             throw new \Exception('bad response from wxpay: ' . (string)$response->getBody());
         }
 
-        $xml = simplexml_load_string((string) $response->getBody());
+        $xml = simplexml_load_string((string) $response->getBody(), 'SimpleXMLElement', LIBXML_NOCDATA);
         if (empty($xml->return_code)) {
             throw new \Exception('bad response from wxpay: ' . (string)$response->getBody());
         }
@@ -477,7 +477,9 @@ abstract class AbstractService
     {
         $imploded = '';
         foreach ($assoc as $name => $value) {
-            $imploded .=  $name . $inGlue . $value . $outGlue;
+            if ($name != "sign" && $value != "" && !is_array($value)) {
+                $imploded .=  $name . $inGlue . $value . $outGlue;
+            }
         }
 
         return substr($imploded, 0, -strlen($outGlue));
