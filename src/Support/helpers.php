@@ -38,7 +38,7 @@ if (!function_exists('xml_to_array')) {
     function xml_to_array($xml)
     {
         if (is_string($xml)) {
-            $xml = simplexml_load_string($xml);
+            $xml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
         }
 
         return array_map('trim', (array)$xml);
