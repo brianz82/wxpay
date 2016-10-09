@@ -1,6 +1,6 @@
 {
   "name": "aplum/wxpay",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "wxpay support",
   "license": "proprietary",
   "type": "library",
