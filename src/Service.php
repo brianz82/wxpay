@@ -1,6 +1,6 @@
 <?php
 
-namespace Homer\Payment\Wxpay;
+namespace Aplum\Payment\Wxpay;
 
 use Carbon\Carbon;
 

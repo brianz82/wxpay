@@ -1,5 +1,5 @@
 suites:
     main:
-        namespace: Homer\Payment\Wxpay
-        psr4_prefix: Homer\Payment\Wxpay
+        namespace: Aplum\Payment\Wxpay
+        psr4_prefix: Aplum\Payment\Wxpay
         src_path: src

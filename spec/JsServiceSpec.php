@@ -1,6 +1,6 @@
 <?php
 
-namespace spec\Homer\Payment\Wxpay;
+namespace spec\Aplum\Payment\Wxpay;
 
 use Carbon\Carbon;
 use GuzzleHttp\RequestOptions;
@@ -21,7 +21,7 @@ class JsServiceSpec extends ObjectBehavior
             'notify_url' => 'http://localhost/trade.php',
         ];
 
-        $this->beAnInstanceOf(\Homer\Payment\Wxpay\JsService::class, [$config, $client]);
+        $this->beAnInstanceOf(\Aplum\Payment\Wxpay\JsService::class, [$config, $client]);
     }
 
     function letGo()
