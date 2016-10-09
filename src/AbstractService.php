@@ -171,19 +171,21 @@ abstract class AbstractService
      * @params integer $fee         total money of order, unit: fen
      * @params integer $refundFee   refund money, unit: fee
      * @param string $transId       (optional) order# in wx's system
+     * @param string $outRefundNo   (optional) merchant's refund number, if null, the system will generate one
      *
      * @return \stdClass            result of this refund. with following fields set:
      *                              - code      response code. 'SUCCESS' on success
      *                              - message   additional message
-     *                              - refundNo  refund#
+     *                              - outRefundNo  refund#
+     *                              - refundId 微信退款单号
      *
      */
-    public function refundTrade($orderNo, $fee, $refundFee, $transId = null)
+    public function refundTrade($orderNo, $fee, $refundFee, $transId=null, $outRefundNo=null)
     {
         $params = array_filter([
             'transaction_id'    => $transId,
             'out_trade_no'      => $orderNo,
-            'out_refund_no'     => $this->genRefundTradeNo(),
+            'out_refund_no'     => $outRefundNo?:$this->genRefundTradeNo(),
             'total_fee'         => $fee,
             'refund_fee'        => $refundFee,
             'refund_fee_type'   => 'CNY',
@@ -219,12 +221,12 @@ abstract class AbstractService
      *                                      4) NOTSURE     未确定，需商户原退款单号重新发起
      *                                      5) CHANGE      转入代发
      */
-    public function queryRefund($refundNo, $orderNo, $transId = '')
+    public function queryRefund($outRefundNo, $orderNo, $transId = '')
     {
         $params = array_filter([
             'transaction_id' => $transId,
             'out_trade_no'   => $orderNo,
-            'out_refund_no'  => $refundNo,
+            'out_refund_no'  => $outRefundNo,
         ]);
         $this->padCommonParams($params);
         $params['sign'] = $this->signRequest($params);
@@ -248,7 +250,7 @@ abstract class AbstractService
             for ($i = 0; $i < $refundCount; $i++) {
                 $result->items[] = $item = new \stdClass();
                 $item->id = (string)$xml->{"refund_id_$i"};
-                $item->refundNo = (string)$xml->{"out_refund_no_$i"};
+                $item->outRefundNo = (string)$xml->{"out_refund_no_$i"};
                 $item->fee = (string)$xml->{"refund_fee_$i"};
                 $item->status = (string)$xml->{"refund_status_$i"};
             }
@@ -264,11 +266,12 @@ abstract class AbstractService
         $xml = $this->postRequest(self::REFUND_URL, $params, true); // NOTE: verify peer is enabled
 
         $result = new \stdClass();
-        $result->refundNo = $params['out_refund_no'];
+        $result->outRefundNo = $params['out_refund_no'];
         $result->message = $this->parseResponseForMessage($xml);
 
         if ((string) $xml->return_code == 'SUCCESS' && (string) $xml->result_code == 'SUCCESS') {
             $result->code = 'SUCCESS';
+            $result->refundId = $xml->refund_id;
         } else {
             $result->code = $this->parseResponseForCode($xml);
         }
