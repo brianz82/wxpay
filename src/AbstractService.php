@@ -1,6 +1,6 @@
 <?php
 
-namespace Homer\Payment\Wxpay;
+namespace Aplum\Payment\Wxpay;
 
 
 use Carbon\Carbon;
@@ -14,6 +14,14 @@ abstract class AbstractService
     const ORDER_QUERY_URL   = 'https://api.mch.weixin.qq.com/pay/orderquery';
     const REFUND_URL        = 'https://api.mch.weixin.qq.com/secapi/pay/refund';
     const REFUND_QUERY_URL  = 'https://api.mch.weixin.qq.com/pay/refundquery';
+
+    /*
+    // 测试环境
+    const UNIFIED_ORDER_URL = 'https://api.mch.weixin.qq.com/sandbox/pay/unifiedorder';
+    const ORDER_QUERY_URL   = 'https://api.mch.weixin.qq.com/sandbox/pay/orderquery';
+    const REFUND_URL        = 'https://api.mch.weixin.qq.com/sandbox/secapi/pay/refund';
+    const REFUND_QUERY_URL  = 'https://api.mch.weixin.qq.com/sandbox/pay/refundquery';
+    */
 
     // default trade state
     const DEFAULT_TRADE_STATE    = 'UNKNOWN';

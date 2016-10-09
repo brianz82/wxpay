@@ -1,5 +1,5 @@
 {
-  "name": "homer/wxpay",
+  "name": "aplum/wxpay",
   "version": "1.0.0",
   "description": "wxpay support",
   "license": "proprietary",
@@ -10,7 +10,7 @@
       "src/Support/helpers.php"
     ],
     "psr-4": {
-      "Homer\\Payment\\Wxpay\\": "src/"
+      "Aplum\\Payment\\Wxpay\\": "src/"
     }
   },
 
